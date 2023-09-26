@@ -48,3 +48,11 @@
    - They might consider implementing GitOps practices to manage their Kubernetes configurations declaratively.
 
 By adopting this modernization strategy, HarryCorp can ensure the reliability and scalability of their high-traffic applications while automating key aspects of their development and deployment processes.
+
+***6 Before running the project, make sure you have the following prerequisites installed:
+
+- Go (Golang)
+- Docker
+- Kubernetes (for production deployment)
+- Helm (for managing Kubernetes deployments)
+- Prometheus and Grafana (for monitoring)
