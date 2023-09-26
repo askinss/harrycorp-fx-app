@@ -1,0 +1,11 @@
+replicaCount: 3
+image:
+  repository: harrycorp/forex-pricing
+  tag: v1.0.0  # Modify with the actual Docker image tag
+resources:
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+  requests:
+    memory: "128Mi"
+    cpu: "250m"

@@ -1,0 +1,54 @@
+name: CI/CD for HarryCorp Forex App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Helm
+      run: |
+        curl -LO https://get.helm.sh/helm-v3.5.4-linux-amd64.tar.gz
+        tar xvzf helm-v3.5.4-linux-amd64.tar.gz
+        sudo mv linux-amd64/helm /usr/local/bin/helm
+        helm repo add stable https://charts.helm.sh/stable
+        helm repo update
+
+    - name: Build Docker image
+      run: |
+        docker build -t harrycorp/forex-pricing:$GITHUB_SHA .
+        docker push harrycorp/forex-pricing:$GITHUB_SHA
+
+    - name: Package Helm Chart
+      run: |
+        helm package ./forex-app
+        mv forex-app-*.tgz ./charts/
+        helm repo index ./charts --url https://harrycorp.github.io/charts
+
+    - name: Deploy to EKS
+      run: |
+        kubectl config use-context harrycorp-forex  # Use the EKS cluster context
+        helm upgrade --install forex-app ./forex-app --namespace default --values ./forex-app/values.yaml
+
+  trivy_scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Trivy
+      run: |
+        wget https://github.com/aquasecurity/trivy/releases/download/v0.20.0/trivy_0.20.0_Linux-64bit.deb
+        sudo dpkg -i trivy_0.20.0_Linux-64bit.deb
+
+    - name: Scan Docker image
+      run: |
+        trivy image harrycorp/forex-pricing:$GITHUB_SHA
+
